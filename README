@@ -1,0 +1,44 @@
+README: indent-stat -- Check indentation statistics of files
+----------------------------------------------------------------
+
+Display indentation statictics from files. This is a poor
+man's implementation to quicly see what kind of indentation
+amounts and indentation levels occur in files. The result are
+presented by file, and total summary over files at the end.
+
+The source package directories:
+
+    bin/            The program and system manual page (*.1)
+    doc/            Documentation
+
+Important files
+
+    COPYING         GPL v2 or later Licence
+    INSTALL         Install instructions
+    ChangeLog       Project change records
+
+Project details
+
+    Homepage
+      http://freshmeat.net/projects/inent-stat
+
+    To report bugs
+      See freshmeat page
+
+    Source code repository
+      See freshmeat page
+
+    Depends
+      Perl (any version). Uses only standard Perl libraries.
+
+Copyright
+
+    Copyright (C) 2009-2010 Jari Aalto
+
+License
+
+    This program is free software; you can redistribute and/or modify
+    program under the terms of GNU General Public license either version 2
+    of the License, or (at your option) any later version.
+
+End of file
