@@ -50,7 +50,7 @@ use vars qw ( $VERSION );
 #   The following variable is updated by custom Emacs setup whenever
 #   this file is saved.
 
-my $VERSION = '2010.0404.0622';
+my $VERSION = '2010.0404.0629';
 
 #  Total statistics
 
@@ -201,7 +201,7 @@ Display statistics about a Perl module:
     7 5
     8 347
     ...
-    SUMMARY BY INDENTATION LEVEL (nultiples of)
+    SUMMARY BY INDENTATION LEVEL (multiples of)
     2 30
     3 282
     4 1042
@@ -226,7 +226,7 @@ None.
 =head1 BUGS
 
 The summary of total statistics at the end are collected in standard
-4-column indent steps, there is no way to detect files that may use 2
+4-column indent steps. There is no way to detect files that may use 2
 or standard TAB positions (column 8) for indentation. That is because
 8 is dividable by 4 (8 % 4 always yields true) and 4 would be always
 dividable by 2.
