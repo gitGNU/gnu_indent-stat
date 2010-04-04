@@ -50,7 +50,7 @@ use vars qw ( $VERSION );
 #   The following variable is updated by custom Emacs setup whenever
 #   this file is saved.
 
-my $VERSION = '2010.0404.0629';
+my $VERSION = '2010.0404.0635';
 
 #  Total statistics
 
@@ -271,7 +271,7 @@ sub Help (;$$)
         $EVAL_ERROR  and  die "$id: Cannot generate Man: $EVAL_ERROR";
 
         my %options;
-        $options{center} = 'cvs status - formatter';
+        $options{center} = "User commands";
 
         my $parser = Pod::Man->new(%options);
         $parser->parse_from_file ($PROGRAM_NAME);
@@ -284,7 +284,7 @@ sub Help (;$$)
 	    # while "strict refs" in use at
 	    # /usr/share/perl/5.10/Pod/Text.pm line 249.
 
-	    system("pod2text $PROGRAM_NAME");
+	    system "pod2text $PROGRAM_NAME";
 	}
 	else
 	{
