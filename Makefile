@@ -87,6 +87,7 @@ PERL		= perl
 # files. Fromt here the fle are installed to $(DOCDIR)
 
 docdir = doc/manual
+manpage = bin/$(PACKAGE).1
 
 all: doc
 	# target: all
@@ -110,6 +111,7 @@ clean:
 
 distclean: clean
 	# Rule: distclean - remove everything that can be generated
+	rm -f $(manpage)
 	rm -rf $(docdir)
 
 realclean: clean
@@ -143,7 +145,7 @@ docdir:
 	# target: docdir - create documentation output directory
 	$(INSTALL_DIR) $(docdir)
 
-bin/$(PACKAGE).1: $(PL_SCRIPT)
+$(manpage): $(PL_SCRIPT)
 	# target: bin/$(PACKAGE).1
 	$(PERL) $< --help-man > $@
 	@-rm -f *.x~~ pod*.tmp
@@ -159,7 +161,7 @@ doc/manual/$(PACKAGE).txt: $(PL_SCRIPT)
 	@-rm -f *.x~~ pod*.tmp
 
 # Rule: man - Generate or update manual page
-man: bin/$(PACKAGE).1
+man: $(manpage)
 
 # Rule: html - Generate HTML pages
 html: docdir test-pod doc/manual/$(PACKAGE).html
