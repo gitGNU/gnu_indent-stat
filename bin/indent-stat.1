@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "INDENT-STAT 1"
-.TH INDENT-STAT 1 "2010-04-03" "perl v5.10.1" "cvs status - formatter"
+.TH INDENT-STAT 1 "2010-04-04" "perl v5.10.1" "User commands"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -138,10 +138,13 @@ indent\-stat \- Check indentation statistics of files
 .Ve
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
-Display indentation statictics from files. This is a poor
-man's implementation to quicly see what kind of indentation
-amounts and indentation levels occur in files. The result are
-presented by file, and total summary over files at the end.
+Display indentation statictics from files. This is a poor man's
+implementation to quicly see what kind of indentation amounts and
+indentation levels occur in files. The result are presented by file,
+and a total summary over files at the end run.
+.PP
+The statistics are by default collected up to 6 standard indentation
+levels (column 6 * 4) for multiples of columns 3, 4 and 5.
 .SH "OPTIONS"
 .IX Header "OPTIONS"
 .IP "\fB\-d, \-\-debug \s-1LEVEL\s0\fR" 4
@@ -156,19 +159,32 @@ Print help in \s-1HTML\s0 format.
 .IP "\fB\-\-help\-man\fR" 4
 .IX Item "--help-man"
 Print help in manual page \f(CWman(1)\fR format.
+.IP "\fB\-l, \-\-line\fR" 4
+.IX Item "-l, --line"
+Present results in one line instead of printing each result in
+separate lines. This may help post-processing and reading the results
+with other tools.
+.IP "\fB\-s, \-\-summary\fR" 4
+.IX Item "-s, --summary"
+Print summary over all files at the end.
 .IP "\fB\-v, \-\-verbose \s-1LEVEL\s0\fR" 4
 .IX Item "-v, --verbose LEVEL"
 Print informational messages. Increase numeric \s-1LEVEL\s0 for more
-verbosity.
+verbosity. The values are:
+.Sp
+.Vb 2
+\&    1 = print file name processed
+\&    2 = print file names and statistics for each
+.Ve
 .IP "\fB\-V, \-\-version\fR" 4
 .IX Item "-V, --version"
 Print contact and version information.
 .SH "EXAMPLES"
 .IX Header "EXAMPLES"
-Display statistics about one of the Perl modules:
+Display statistics about a Perl module:
 .PP
 .Vb 1
-\&    $ indent\-stat /usr/share/perl/5.10.1/Pod/Html.pm
+\&    $ indent\-stat \-v \-s /usr/share/perl/5.10.1/Pod/Html.pm
 \&
 \&    /usr/share/perl/5.10.1/Pod/Html.pm BY INDENT
 \&    2 30
@@ -178,7 +194,7 @@ Display statistics about one of the Perl modules:
 \&    7 5
 \&    8 347
 \&    ...
-\&    Totals BY INDENTATION LEVEL (nultiples of)
+\&    SUMMARY BY INDENTATION LEVEL (multiples of)
 \&    2 30
 \&    3 282
 \&    4 1042
@@ -196,6 +212,13 @@ None.
 .SH "FILES"
 .IX Header "FILES"
 None.
+.SH "BUGS"
+.IX Header "BUGS"
+The summary of total statistics at the end are collected in standard
+4\-column indent steps. There is no way to detect files that may use 2
+or standard \s-1TAB\s0 positions (column 8) for indentation. That is because
+8 is dividable by 4 (8 % 4 always yields true) and 4 would be always
+dividable by 2.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
 \&\fIindent\fR\|(1)

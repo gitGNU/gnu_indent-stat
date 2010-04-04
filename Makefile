@@ -66,6 +66,7 @@ INSTALL		= /usr/bin/install
 INSTALL_BIN	= $(INSTALL) -m 755
 INSTALL_DATA	= $(INSTALL) -m 644
 INSTALL_SUID	= $(INSTALL) -m 4755
+INSTALL_DIR	= $(INSTALL) -m 755 -d
 
 DIST_DIR	= ../build-area
 DATE		= `date +"%Y.%m%d"`
@@ -80,13 +81,14 @@ INSTALL_OBJS_DOC   = README COPYING
 INSTALL_OBJS_MAN   = bin/*.1
 
 XARGS		= xargs xargs --no-run-if-empty
+PERL		= perl
 
 # Do not chnage this. This is the location of "local" auto generated
 # files. Fromt here the fle are installed to $(DOCDIR)
 
 docdir = doc/manual
 
-all:
+all: doc
 	# target: all
 	@echo "Nothing to compile."
 	@echo "Try 'make help' or 'make -n DESTDIR= prefix=/usr/local install'"
@@ -138,19 +140,20 @@ dist-ls:
 ls: dist-ls
 
 docdir:
-	$(INSTALL_DATA) -d $(docdir)
+	# target: docdir - create documentation output directory
+	$(INSTALL_DIR) $(docdir)
 
 bin/$(PACKAGE).1: $(PL_SCRIPT)
 	# target: bin/$(PACKAGE).1
 	$(PERL) $< --help-man > $@
 	@-rm -f *.x~~ pod*.tmp
 
-doc/manual/$(PACKAGE).html: docdir $(PL_SCRIPT)
+doc/manual/$(PACKAGE).html: $(PL_SCRIPT)
 	# target: doc/manual/$(PACKAGE).html
 	$(PERL) $< --help-html > $@
 	@-rm -f *.x~~ pod*.tmp
 
-doc/manual/$(PACKAGE).txt: docdir $(PL_SCRIPT)
+doc/manual/$(PACKAGE).txt: $(PL_SCRIPT)
 	# target: doc/manual/$(PACKAGE).txt
 	$(PERL) $< --help > $@
 	@-rm -f *.x~~ pod*.tmp
@@ -159,21 +162,24 @@ doc/manual/$(PACKAGE).txt: docdir $(PL_SCRIPT)
 man: bin/$(PACKAGE).1
 
 # Rule: html - Generate HTML pages
-html: doc/manual/$(PACKAGE).html
+html: docdir test-pod doc/manual/$(PACKAGE).html
 
 # Rule: txt - Generate TXT pages
-txt: doc/manual/$(PACKAGE).txt
+txt: docdir test-pod doc/manual/$(PACKAGE).txt
 
 # Rule: doc - Generate or update all documentation
 doc: man html txt
 
-perl-test:
-	# Rule: perl-test - Check program syntax
-	perl -cw $(PL_SCRIPT)
+test-pod:
+	# Rule: pod-test - Check POD syntax
 	podchecker $(PL_SCRIPT)
 
+test-perl:
+	# Rule: perl-test - Check program syntax
+	perl -cw $(PL_SCRIPT)
+
 # Rule: test - Run tests
-test: perl-test
+test: test-perl test-pod
 
 # Rule: install-doc - Install documentation
 install-doc:

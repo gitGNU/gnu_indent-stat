@@ -1,5 +1,12 @@
 2010-04-04 Sun  Jari Aalto  <jari.aalto@cante.net>
 
+	* Makefile:
+	(top level): Define XARGS, INSTALL_DIR. Add documentation to
+	almost every target. The doc/ directory hierarchy and manual pages
+	area now generated and not included by default.
+	(docdir): New.
+	(test-pod): New.
+
 	* bin/indent-stat.pl
 	(top level):  qremove w( -no_match_vars ) from "use English";
 	(top level): Add new variables $DEFAULT_PATH_EXCLUDE and
