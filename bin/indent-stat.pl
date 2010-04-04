@@ -32,9 +32,10 @@ use strict;
 use autouse 'Pod::Text' => qw( pod2text );
 use autouse 'Pod::Html' => qw( pod2html );
 
-use English qw( -no_match_vars );
+use English;
 use Getopt::Long;
 use File::Basename;
+use File::Find;
 
 # ****************************************************************************
 #
@@ -49,12 +50,24 @@ use vars qw ( $VERSION );
 #   The following variable is updated by custom Emacs setup whenever
 #   this file is saved.
 
-my $VERSION = '2010.0403.1801';
+my $VERSION = '2010.0404.0622';
 
 #  Total statistics
 
 my %TABS;
 my %DIV;
+
+my $DEFAULT_PATH_EXCLUDE = ''		# Matches *only path component
+    . '(CVS|RCS|\.(bzr|svn|git|darcs|arch|mtn|hg))$'
+    ;
+
+my $DEFAULT_FILE_EXCLUDE = ''		# Matches *only* file component
+    . '[#~]$'
+    . '|\.[#]'
+    . '|\.(s?o|l?a|bin|com|exe|class|elc)$'
+    . '|\.(ods|odt|pdf|ppt|xls|rtf)$'
+    . '|\.(xpm|jpg|png|gif|tiff|bmp)$'
+    ;
 
 # ****************************************************************************
 #
@@ -76,19 +89,20 @@ sub Initialize ()
 {
     use vars qw
     (
+	$LICENSE
+        $CONTACT
+        $URL
+
         $LIB
         $PROGNAME
-        $CONTACT
-	$LICENSE
-        $URL
     );
 
     $LICENSE	= "GPL-2+";
+    $CONTACT    = "Jari Aalto";
+    $URL        = "http://freshmeat.net/projects/indent-stat";
+
     $LIB        = basename $PROGRAM_NAME;
     $PROGNAME   = $LIB;
-
-    $CONTACT     = "Jari Aalto";
-    $URL         = "http://freshmeat.net/projects/indent-stat";
 
     $OUTPUT_AUTOFLUSH = 1;
 }
@@ -121,10 +135,13 @@ indent-stat - Check indentation statistics of files
 
 =head1 DESCRIPTION
 
-Display indentation statictics from files. This is a poor
-man's implementation to quicly see what kind of indentation
-amounts and indentation levels occur in files. The result are
-presented by file, and total summary over files at the end.
+Display indentation statictics from files. This is a poor man's
+implementation to quicly see what kind of indentation amounts and
+indentation levels occur in files. The result are presented by file,
+and a total summary over files at the end run.
+
+The statistics are by default collected up to 6 standard indentation
+levels (column 6 * 4) for multiples of columns 3, 4 and 5.
 
 =head1 OPTIONS
 
@@ -146,10 +163,23 @@ Print help in HTML format.
 
 Print help in manual page C<man(1)> format.
 
+=item B<-l, --line>
+
+Present results in one line instead of printing each result in
+separate lines. This may help post-processing and reading the results
+with other tools.
+
+=item B<-s, --summary>
+
+Print summary over all files at the end.
+
 =item B<-v, --verbose LEVEL>
 
 Print informational messages. Increase numeric LEVEL for more
-verbosity.
+verbosity. The values are:
+
+    1 = print file name processed
+    2 = print file names and statistics for each
 
 =item B<-V, --version>
 
@@ -159,9 +189,9 @@ Print contact and version information.
 
 =head1 EXAMPLES
 
-Display statistics about one of the Perl modules:
+Display statistics about a Perl module:
 
-    $ indent-stat /usr/share/perl/5.10.1/Pod/Html.pm
+    $ indent-stat -v -s /usr/share/perl/5.10.1/Pod/Html.pm
 
     /usr/share/perl/5.10.1/Pod/Html.pm BY INDENT
     2 30
@@ -171,7 +201,7 @@ Display statistics about one of the Perl modules:
     7 5
     8 347
     ...
-    Totals BY INDENTATION LEVEL (nultiples of)
+    SUMMARY BY INDENTATION LEVEL (nultiples of)
     2 30
     3 282
     4 1042
@@ -192,6 +222,14 @@ None.
 =head1 FILES
 
 None.
+
+=head1 BUGS
+
+The summary of total statistics at the end are collected in standard
+4-column indent steps, there is no way to detect files that may use 2
+or standard TAB positions (column 8) for indentation. That is because
+8 is dividable by 4 (8 % 4 always yields true) and 4 would be always
+dividable by 2.
 
 =head1 SEE ALSO
 
@@ -262,6 +300,30 @@ sub Help (;$$)
 #
 #   DESCRIPTION
 #
+#       Display default excludes.
+#
+#   INPUT PARAMETERS
+#
+#       None
+#
+#   RETURN VALUES
+#
+#       None
+#
+# ****************************************************************************
+
+sub HelpExclude ()
+{
+    my $id = "$LIB.HelpExclude";
+
+    print "Default path exclude regexp: '$DEFAULT_PATH_EXCLUDE'\n";
+    print "Default file exclude regexp: '$DEFAULT_FILE_EXCLUDE'\n";
+}
+
+# ****************************************************************************
+#
+#   DESCRIPTION
+#
 #       Read command line arguments and their parameters.
 #
 #   INPUT PARAMETERS
@@ -283,6 +345,15 @@ sub HandleCommandLineArgs ()
         $test
         $verb
         $debug
+
+	$INDENT_MAX
+
+        @OPT_FILE_REGEXP_EXCLUDE
+        @OPT_FILE_REGEXP_INCLUDE
+        $OPT_LINE
+        $OPT_RECURSIVE
+        $OPT_REGEXP
+        $OPT_SUMMARY
     );
 
     Getopt::Long::config( qw
@@ -292,17 +363,28 @@ sub HandleCommandLineArgs ()
         no_ignore_case_always
     ));
 
-    my ( $help, $helpMan, $helpHtml, $version ); # local variables to function
+    my ( $help, $helpMan, $helpHtml, $version );
+    my ( $helpExclude, $indent);
 
     $debug = -1;
+    $verb  = -1;
 
     GetOptions      # Getopt::Long
     (
-	  "help-html"	    => \$helpHtml
+	  "help-exclude"    => \$helpExclude
+	, "help-html"	    => \$helpHtml
 	, "help-man"	    => \$helpMan
 	, "h|help"	    => \$help
+	, "i|indent-max"    => \$indent
+	, "line"	    => \$OPT_LINE
+	, "include=s"	    => \@OPT_FILE_REGEXP_INCLUDE
+	, "r|recursive"	    => \$OPT_RECURSIVE
+	, "R|regexp=s"	    => \$OPT_REGEXP
+	, "summary"	    => \$OPT_SUMMARY
+	, "test"	    => \$test
 	, "v|verbose:i"	    => \$verb
 	, "V|version"	    => \$version
+	, "x|exclude=s"	    => \@OPT_FILE_REGEXP_EXCLUDE
     );
 
     $version	and  die "$VERSION $CONTACT $LICENSE $URL\n";
@@ -311,22 +393,33 @@ sub HandleCommandLineArgs ()
     $helpHtml	and  Help(-html);
     $version	and  Version();
 
-    $debug = 1  if $debug == 0;
-    $debug = 0  if $debug < 0;
+    $debug = 1  if  $debug == 0;
+    $debug = 0  if  $debug < 0;
 
-    $verb = 1  if  $test and $verb == 0;
-    $verb = 5  if  $debug;
+    $verb = 1	if  $verb == 0;
+    $verb = 0	if  $verb < 0;
+
+    $verb = 1	if  $test and $verb == 0;
+    $verb = 5	if  $verb;
+
+    #	Examine only max up to 6 standard 4-column indentation levels
+    #	deep. We suppose that there is nothing interesting after that
+    #	indentation, becasue code is too much indented. (think 6
+    #	if-loops, while loops...)
+
+    $INDENT_MAX = $indent || 6 * 4;
 }
 
 # ****************************************************************************
 #
 #   DESCRIPTION
 #
-#       Set global variables for the program
+#       Print hash.
 #
 #   INPUT PARAMETERS
 #
-#       None
+#       $href			Hash reference
+#	$str			String to print as "headiing" before content
 #
 #   RETURN VALUES
 #
@@ -337,25 +430,38 @@ sub HandleCommandLineArgs ()
 sub Print ($;$)
 {
     my $href = shift;
-    my $topic = shift;
+    my $str = shift;
 
-    print $topic, "\n"	if $topic;
+    my $eol = $OPT_LINE ? " " : "\n";
+    my $sep = $OPT_LINE ? ":" : " ";
 
-    for my $tab ( sort {$a <=> $b} keys %$href )
+    print $str, $eol	if $str;
+
+    my @keys = sort {$a <=> $b} keys %$href;
+    my $i    = 0;
+    my $len  = @keys;
+
+    for my $tab ( @keys )
     {
-	print $tab, " ", $href->{$tab}, "\n";
-    }
+	print $tab, $sep, $href->{$tab};
+
+	#   Do not print trailing whitespace in linewise mode for last element
+
+	print $eol  if  ++$i < $len;
+    };
+
+    print "\n"  unless  $eol eq "\n";
 }
 
 # ****************************************************************************
 #
 #   DESCRIPTION
 #
-#       Set global variables for the program
+#       Convert tabs to spaces. Code is from Perl Cookbook.
 #
 #   INPUT PARAMETERS
 #
-#       None
+#       $str			String with tabs
 #
 #   RETURN VALUES
 #
@@ -365,33 +471,31 @@ sub Print ($;$)
 
 sub TabToSpaces ($)
 {
-    # Code from Perl Cookbook
-
-    local $_ = shift;
+    local $ARG = shift;
 
     # expand leading tabs first--the common case
 
-    s/^(\t+)/' ' x (8 * length($1))/e;
+    s/^(\t+)/' ' x (8 * length $1)/e;
 
     # Now look for nested tabs. Have to expand them one at a time - hence
     # the while loop. In each iteration, a tab is replaced by the number of
     # spaces left till the next tab-stop. The loop exits when there are
     # no more tabs left
 
-    1 while (s/\t/' ' x (8 - length($`)%8)/e);
+    1 while ( s/\t/' ' x ((8 - length $PREMATCH) % 8)/e );
 
-    $_;
+    $ARG;
 }
 
 # ****************************************************************************
 #
 #   DESCRIPTION
 #
-#       Set global variables for the program
+#       Read a FILE and gather statistics. Display per file statistics.
 #
 #   INPUT PARAMETERS
 #
-#       None
+#       $file			Path name
 #
 #   RETURN VALUES
 #
@@ -423,7 +527,7 @@ sub Read ($)
 		$div{2}++;
 		$DIV{2}++;
 	    }
-	    elsif ( $len > 2   and   $len <= 4 * 6) # Examine max up to 6 indentation levels deep
+	    elsif ( $len > 2   and   $len <= $INDENT_MAX)
 	    {
 		for my $div (3, 4, 5)
 		{
@@ -438,8 +542,15 @@ sub Read ($)
 	}
     }
 
-    Print \%tabs, "$file BY INDENT";
-    Print \%div, "$file BY INDENTATION LEVEL (multiples of)";
+    if ( $verb == 1 )
+    {
+	print $file, "\n";
+    }
+    elsif ( $verb > 1 )
+    {
+	Print \%tabs, "$file BY INDENT";
+	Print \%div, "$file BY INDENTATION LEVEL (multiples of)";
+    }
 
     close $FH;
 }
@@ -474,8 +585,11 @@ sub Main ()
 	Read $file;
     }
 
-    Print \%TABS, "Totals BY INDENT";
-    Print \%DIV, "Totals BY INDENTATION LEVEL (nultiples of)";
+    if ( $OPT_SUMMARY )
+    {
+	Print \%TABS, "SUMMARY BY USED INDENTATION";
+	Print \%DIV, "SUMMARY BY INDENT LEVEL (multiples of)";
+    }
 }
 
 Main();

@@ -1,3 +1,21 @@
+2010-04-04 Sun  Jari Aalto  <jari.aalto@cante.net>
+
+	* bin/indent-stat.pl
+	(top level):  qremove w( -no_match_vars ) from "use English";
+	(top level): Add new variables $DEFAULT_PATH_EXCLUDE and
+	$DEFAULT_FILE_EXCLUDE.
+	(Initialize): Change variable definition order.
+	(HelpExclude): New.
+	(Print): Correct function description block.
+	(TabToSpaces): Correct function description block. "use English".
+	(HandleCommandLineArgs): Add variables $OPT_FILE_REGEXP_INCLUDE,
+	$OPT_RECURSIVE, $OPT_REGEXP, @OPT_FILE_REGEXP_EXCLUDE,
+	$INDENT_MAX, $OPT_SUMMARY and their new command line options.
+	(Read): Correct function description block. Use $INDENT_MAX. Check
+	$verb and print only needed information.
+	(Main): Obey $OPT_SUMMARY setting.
+	(Help::OPTIONS): Document --verbose, --summary.
+
 2009-12-15 Sat  Jari Aalto  <jari.aalto@cante.net>
 
 	* Initial release.
