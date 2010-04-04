@@ -79,23 +79,36 @@ INSTALL_OBJS_BIN   = $(PL_SCRIPT)
 INSTALL_OBJS_DOC   = README COPYING
 INSTALL_OBJS_MAN   = bin/*.1
 
+XARGS		= xargs xargs --no-run-if-empty
+
+# Do not chnage this. This is the location of "local" auto generated
+# files. Fromt here the fle are installed to $(DOCDIR)
+
+docdir = doc/manual
+
 all:
+	# target: all
 	@echo "Nothing to compile."
 	@echo "Try 'make help' or 'make -n DESTDIR= prefix=/usr/local install'"
 
 # Rule: help - display Makefile rules
 help:
-	grep "^# Rule:" Makefile | sort
+	grep "^[[:space:]]*# Rule:" Makefile | sed 's/^[[:space:]]*//' | sort
 
 # Rule: clean - remove temporary files
 clean:
-	# clean
-	-rm -f *[#~] *.\#* \
-	*.x~~ pod*.tmp
+	# target: clean
+	find .	-name "*[#~]" \
+		-o -name "*.\#*" \
+		-o -name "*.x~~" \
+		-o -name "pod*.tmp" | \
+	$(XARGS) rm -f
 
 	rm -rf tmp
 
 distclean: clean
+	# Rule: distclean - remove everything that can be generated
+	rm -rf $(docdir)
 
 realclean: clean
 
@@ -115,7 +128,7 @@ dist-git: test doc
 dist-snap: test doc
 	@echo gt tar -q -z -p $(PACKAGE) -c -D master
 
-# Rule: dist - [maintainer] release from Git repository
+# Rule: dist-git - [maintainer] make release archive
 dist: dist-git
 
 dist-ls:
@@ -124,42 +137,46 @@ dist-ls:
 # Rule: dist - [maintainer] list of release files
 ls: dist-ls
 
+docdir:
+	$(INSTALL_DATA) -d $(docdir)
+
 bin/$(PACKAGE).1: $(PL_SCRIPT)
+	# target: bin/$(PACKAGE).1
 	$(PERL) $< --help-man > $@
 	@-rm -f *.x~~ pod*.tmp
 
-doc/manual/$(PACKAGE).html: $(PL_SCRIPT)
+doc/manual/$(PACKAGE).html: docdir $(PL_SCRIPT)
+	# target: doc/manual/$(PACKAGE).html
 	$(PERL) $< --help-html > $@
 	@-rm -f *.x~~ pod*.tmp
 
-doc/manual/$(PACKAGE).txt: $(PL_SCRIPT)
+doc/manual/$(PACKAGE).txt: docdir $(PL_SCRIPT)
+	# target: doc/manual/$(PACKAGE).txt
 	$(PERL) $< --help > $@
 	@-rm -f *.x~~ pod*.tmp
-
-doc/conversion/index.html: doc/conversion/index.txt
-	perl -S t2html.pl --Auto-detect --Out --print-url $<
 
 # Rule: man - Generate or update manual page
 man: bin/$(PACKAGE).1
 
+# Rule: html - Generate HTML pages
 html: doc/manual/$(PACKAGE).html
 
+# Rule: txt - Generate TXT pages
 txt: doc/manual/$(PACKAGE).txt
 
 # Rule: doc - Generate or update all documentation
 doc: man html txt
 
-# Rule: perl-test - Check program syntax
 perl-test:
-	# perl-test - Check syntax
+	# Rule: perl-test - Check program syntax
 	perl -cw $(PL_SCRIPT)
 	podchecker $(PL_SCRIPT)
 
 # Rule: test - Run tests
 test: perl-test
 
+# Rule: install-doc - Install documentation
 install-doc:
-	# Rule install-doc - Install documentation
 	$(INSTALL_BIN) -d $(DOCDIR)
 
 	[ ! "$(INSTALL_OBJS_DOC)" ] || \
@@ -169,12 +186,12 @@ install-doc:
 	$(TAR) -C $(DOCDIR) --extract --file=-
 
 install-man: man
-	# install-man - Install manual pages
+	# Rule: install-man - Install manual pages
 	$(INSTALL_BIN) -d $(MANDIR1)
 	$(INSTALL_DATA) $(INSTALL_OBJS_MAN) $(MANDIR1)
 
 install-bin:
-	# install-bin - Install programs
+	# Rule: install-bin - Install programs
 	$(INSTALL_BIN) -d $(BINDIR)
 	for f in $(INSTALL_OBJS_BIN); \
 	do \
