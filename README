@@ -9,7 +9,7 @@ presented by file, and total summary over files at the end.
 The source package directories:
 
     bin/            The program and system manual page (*.1)
-    doc/            Documentation
+    doc/            Documentation; appears after running "make"
 
 Important files
 
