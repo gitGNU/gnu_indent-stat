@@ -91,10 +91,9 @@ manpage = bin/$(PACKAGE).1
 
 all: doc
 	# target: all
-	@echo "Nothing to compile."
-	@echo "Try 'make help' or 'make -n DESTDIR= prefix=/usr/local install'"
+	@echo "For more information, see 'make help'"
 
-# Rule: help - display Makefile rules
+# Rule: help - Display Makefile rules
 help:
 	grep "^[[:space:]]*# Rule:" Makefile | sed 's/^[[:space:]]*//' | sort
 
@@ -161,7 +160,7 @@ doc/manual/$(PACKAGE).txt: $(PL_SCRIPT)
 	@-rm -f *.x~~ pod*.tmp
 
 # Rule: man - Generate or update manual page
-man: $(manpage)
+man: docdir $(manpage)
 
 # Rule: html - Generate HTML pages
 html: docdir test-pod doc/manual/$(PACKAGE).html
@@ -180,7 +179,7 @@ test-perl:
 	# Rule: perl-test - Check program syntax
 	perl -cw $(PL_SCRIPT)
 
-# Rule: test - Run tests
+# Rule: test - Run all tests
 test: test-perl test-pod
 
 # Rule: install-doc - Install documentation
@@ -207,10 +206,10 @@ install-bin:
 		$(INSTALL_BIN) $$f $(BINDIR)/$$dest; \
 	done
 
-# Rule: install - Standard install
+# Rule: install - Standard install. Use variables like: DESTDIR= prefix=/usr/local
 install: install-bin install-man install-doc
 
-# Rule: install-test - for Maintainer only
+# Rule: install-test - [maintainer] Dry-run install to tmp/ directory
 install-test:
 	rm -rf tmp
 	make DESTDIR=`pwd`/tmp prefix=/usr install

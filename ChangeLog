@@ -1,3 +1,10 @@
+2010-04-14 Wed  Jari Aalto  <jari.aalto@cante.net>
+
+	* Makefile
+	(top level): Adjust target '#Rule:' documentation comments.
+	(man): Call target 'docdir'.
+	(all): Adjust output message.
+
 2010-04-04 Sun  Jari Aalto  <jari.aalto@cante.net>
 
 	* Makefile:
