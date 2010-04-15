@@ -32,7 +32,7 @@ use strict;
 use autouse 'Pod::Text' => qw( pod2text );
 use autouse 'Pod::Html' => qw( pod2html );
 
-use English;
+use English qw(-no_match_vars);
 use Getopt::Long;
 use File::Basename;
 use File::Find;
@@ -57,12 +57,12 @@ my $VERSION = '2010.0404.0635';
 my %TABS;
 my %DIV;
 
-my $DEFAULT_PATH_EXCLUDE = ''		# Matches *only path component
-    . '(CVS|RCS|\.(bzr|svn|git|darcs|arch|mtn|hg))$'
+my $DEFAULT_PATH_EXCLUDE =            # Matches *only path component
+    '(CVS|RCS|\.(bzr|svn|git|darcs|arch|mtn|hg))$'
     ;
 
-my $DEFAULT_FILE_EXCLUDE = ''		# Matches *only* file component
-    . '[#~]$'
+my $DEFAULT_FILE_EXCLUDE =            # Matches *only* file component
+    '[#~]$'
     . '|\.[#]'
     . '|\.(s?o|l?a|bin|com|exe|class|elc)$'
     . '|\.(ods|odt|pdf|ppt|xls|rtf)$'
@@ -90,14 +90,14 @@ sub Initialize ()
     use vars qw
     (
 	$LICENSE
-        $CONTACT
-        $URL
+	$CONTACT
+	$URL
 
-        $LIB
-        $PROGNAME
+	$LIB
+	$PROGNAME
     );
 
-    $LICENSE	= "GPL-2+";
+    $LICENSE    = "GPL-2+";
     $CONTACT    = "Jari Aalto";
     $URL        = "http://freshmeat.net/projects/indent-stat";
 
@@ -211,10 +211,6 @@ Display statistics about a Perl module:
 
 None.
 
-=head1 EXAMPLES
-
-None.
-
 =head1 ENVIRONMENT
 
 None.
@@ -223,7 +219,7 @@ None.
 
 None.
 
-=head1 BUGS
+=head1 BUGS AND LIMITATIONS
 
 The summary of total statistics at the end are collected in standard
 4-column indent steps. There is no way to detect files that may use 2
@@ -231,13 +227,21 @@ or standard TAB positions (column 8) for indentation. That is because
 8 is dividable by 4 (8 % 4 always yields true) and 4 would be always
 dividable by 2.
 
+=head1 EXIT STATUS
+
+Not defined.
+
+=head1 DEPENDENCIES
+
+Uses standard Perl modules.
+
+=head1 BUGS AND LIMITATIONS
+
+None.
+
 =head1 SEE ALSO
 
 indent(1)
-
-=head1 COREQUISITES
-
-Uses standard Perl modules.
 
 =head1 AVAILABILITY
 
@@ -245,9 +249,11 @@ Homepage is at http://freshmeat.net/projects/indent-stat
 
 =head1 AUTHOR
 
-Copyright (C) 2009-2010 Jari Aalto
+Jari Aalto
 
-=head1 LICENSE
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (C) 2009-2010 Jari Aalto
 
 This program is free software; you can redistribute and/or modify
 program under the terms of GNU General Public license either version 2
@@ -263,18 +269,18 @@ sub Help (;$$)
 
     if ( $type eq -html )
     {
-        pod2html $PROGRAM_NAME;
+	pod2html $PROGRAM_NAME;
     }
     elsif ( $type eq -man )
     {
 	eval "use Pod::Man"
 	    or die "$id: Cannot generate Man: $EVAL_ERROR";
 
-        my %options;
-        $options{center} = "User commands";
+	my %options;
+	$options{center} = "User commands";
 
-        my $parser = Pod::Man->new(%options);
-        $parser->parse_from_file ($PROGRAM_NAME);
+	my $parser = Pod::Man->new(%options);
+	$parser->parse_from_file ($PROGRAM_NAME);
     }
     else
     {
@@ -342,25 +348,25 @@ sub HandleCommandLineArgs ()
 
     use vars qw
     (
-        $test
-        $verb
-        $debug
+	$test
+	$verb
+	$debug
 
 	$INDENT_MAX
 
-        @OPT_FILE_REGEXP_EXCLUDE
-        @OPT_FILE_REGEXP_INCLUDE
-        $OPT_LINE
-        $OPT_RECURSIVE
-        $OPT_REGEXP
-        $OPT_SUMMARY
+	@OPT_FILE_REGEXP_EXCLUDE
+	@OPT_FILE_REGEXP_INCLUDE
+	$OPT_LINE
+	$OPT_RECURSIVE
+	$OPT_REGEXP
+	$OPT_SUMMARY
     );
 
     Getopt::Long::config( qw
     (
-        require_order
-        no_ignore_case
-        no_ignore_case_always
+	require_order
+	no_ignore_case
+	no_ignore_case_always
     ));
 
     my ( $help, $helpMan, $helpHtml, $version );
@@ -372,40 +378,40 @@ sub HandleCommandLineArgs ()
     GetOptions      # Getopt::Long
     (
 	  "help-exclude"    => \$helpExclude
-	, "help-html"	    => \$helpHtml
-	, "help-man"	    => \$helpMan
-	, "h|help"	    => \$help
+	, "help-html"       => \$helpHtml
+	, "help-man"        => \$helpMan
+	, "h|help"          => \$help
 	, "i|indent-max"    => \$indent
-	, "line"	    => \$OPT_LINE
-	, "include=s"	    => \@OPT_FILE_REGEXP_INCLUDE
-	, "r|recursive"	    => \$OPT_RECURSIVE
-	, "R|regexp=s"	    => \$OPT_REGEXP
-	, "summary"	    => \$OPT_SUMMARY
-	, "test"	    => \$test
-	, "v|verbose:i"	    => \$verb
-	, "V|version"	    => \$version
-	, "x|exclude=s"	    => \@OPT_FILE_REGEXP_EXCLUDE
+	, "line"            => \$OPT_LINE
+	, "include=s"       => \@OPT_FILE_REGEXP_INCLUDE
+	, "r|recursive"     => \$OPT_RECURSIVE
+	, "R|regexp=s"      => \$OPT_REGEXP
+	, "summary"         => \$OPT_SUMMARY
+	, "test"            => \$test
+	, "v|verbose:i"     => \$verb
+	, "V|version"       => \$version
+	, "x|exclude=s"     => \@OPT_FILE_REGEXP_EXCLUDE
     );
 
-    $version	and  die "$VERSION $CONTACT $LICENSE $URL\n";
-    $help	and  Help();
-    $helpMan	and  Help(-man);
-    $helpHtml	and  Help(-html);
-    $version	and  Version();
+    $version    and  die "$VERSION $CONTACT $LICENSE $URL\n";
+    $help       and  Help();
+    $helpMan    and  Help(-man);
+    $helpHtml   and  Help(-html);
+    $version    and  Version();
 
     $debug = 1  if  $debug == 0;
     $debug = 0  if  $debug < 0;
 
-    $verb = 1	if  $verb == 0;
-    $verb = 0	if  $verb < 0;
+    $verb = 1   if  $verb == 0;
+    $verb = 0   if  $verb < 0;
 
-    $verb = 1	if  $test and $verb == 0;
-    $verb = 5	if  $verb;
+    $verb = 1   if  $test and $verb == 0;
+    $verb = 5   if  $verb;
 
-    #	Examine only max up to 6 standard 4-column indentation levels
-    #	deep. We suppose that there is nothing interesting after that
-    #	indentation, becasue code is too much indented. (think 6
-    #	if-loops, while loops...)
+    #   Examine only max up to 6 standard 4-column indentation levels
+    #   deep. We suppose that there is nothing interesting after that
+    #   indentation, becasue code is too much indented. (think 6
+    #   if-loops, while loops...)
 
     $INDENT_MAX = $indent || 6 * 4;
 }
@@ -418,8 +424,8 @@ sub HandleCommandLineArgs ()
 #
 #   INPUT PARAMETERS
 #
-#       $href			Hash reference
-#	$str			String to print as "headiing" before content
+#       $href                   Hash reference
+#       $str                    String to print as "headiing" before content
 #
 #   RETURN VALUES
 #
@@ -435,7 +441,7 @@ sub Print ($;$)
     my $eol = $OPT_LINE ? " " : "\n";
     my $sep = $OPT_LINE ? ":" : " ";
 
-    print $str, $eol	if $str;
+    print $str, $eol    if $str;
 
     my @keys = sort {$a <=> $b} keys %$href;
     my $i    = 0;
@@ -461,7 +467,7 @@ sub Print ($;$)
 #
 #   INPUT PARAMETERS
 #
-#       $str			String with tabs
+#       $str                    String with tabs
 #
 #   RETURN VALUES
 #
@@ -495,7 +501,7 @@ sub TabToSpaces ($)
 #
 #   INPUT PARAMETERS
 #
-#       $file			Path name
+#       $file                   Path name
 #
 #   RETURN VALUES
 #
@@ -507,7 +513,7 @@ sub Read ($)
 {
     my $file = shift;
 
-    open my $FH, "<", $file	or return;
+    open my $FH, "<", $file     or return;
 
     my (%tabs, %div);
 
@@ -542,6 +548,8 @@ sub Read ($)
 	}
     }
 
+    close $FH  or  warn "Close $file failure $ERRNO";
+
     if ( $verb == 1 )
     {
 	print $file, "\n";
@@ -551,8 +559,6 @@ sub Read ($)
 	Print \%tabs, "$file BY INDENT";
 	Print \%div, "$file BY INDENTATION LEVEL (multiples of)";
     }
-
-    close $FH;
 }
 
 # ****************************************************************************

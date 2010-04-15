@@ -1,6 +1,7 @@
 2010-04-15 Thu  Jari Aalto  <jari.aalto@cante.net>
 
 	* bin/indent-stat.pl (Help): rewrite eval Pod::Man call.
+	(Read): Correct many of the Perl::Critic remarks.
 
 2010-04-14 Wed  Jari Aalto  <jari.aalto@cante.net>
 
