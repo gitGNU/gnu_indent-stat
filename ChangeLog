@@ -1,3 +1,11 @@
+2010-04-21 Wed  Jari Aalto  <jari.aalto@cante.net>
+
+	* README (README): Rewrite summary.
+	(doc/): mention GFDL option for manuals.
+
+	* bin/indent-stat.pl (HELP::DESCRIPTION): Rewrite summary.
+	(HELP::LICENSE AND COPYRIGHT): Add GDL option.
+
 2010-04-15 Thu  Jari Aalto  <jari.aalto@cante.net>
 
 	* bin/indent-stat.pl (Help): rewrite eval Pod::Man call.

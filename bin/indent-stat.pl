@@ -135,10 +135,9 @@ indent-stat - Check indentation statistics of files
 
 =head1 DESCRIPTION
 
-Display indentation statictics from files. This is a poor man's
-implementation to quicly see what kind of indentation amounts and
-indentation levels occur in files. The result are presented by file,
-and a total summary over files at the end run.
+Display indentation statictics from files. A simple QA tool to quickly
+see if there is varying indentation levels in files. The result are
+presented by file. A statistical summary is calculated at the end.
 
 The statistics are by default collected up to 6 standard indentation
 levels (column 6 * 4) for multiples of columns 3, 4 and 5.
@@ -258,6 +257,9 @@ Copyright (C) 2009-2010 Jari Aalto
 This program is free software; you can redistribute and/or modify
 program under the terms of GNU General Public license either version 2
 of the License, or (at your option) any later version.
+
+Alternatively, this manual manual is also released (at your option)
+under the GNU FDL, version 1.3, or (at your option) any later version.
 
 =cut
 
