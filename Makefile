@@ -2,7 +2,7 @@
 #
 #   Copyright information
 #
-#	Copyright (C) 2002-2010 Jari Aalto
+#	Copyright (C) 2009-2010 Jari Aalto
 #
 #   License
 #
@@ -83,8 +83,8 @@ INSTALL_OBJS_MAN   = bin/*.1
 XARGS		= xargs xargs --no-run-if-empty
 PERL		= perl
 
-# Do not chnage this. This is the location of "local" auto generated
-# files. Fromt here the fle are installed to $(DOCDIR)
+# Do not change these. This is the location of auto generated
+# files. From there the fle are installed to $(DOCDIR)
 
 docdir = doc/manual
 manpage = bin/$(PACKAGE).1
