@@ -50,7 +50,7 @@ use vars qw ( $VERSION );
 #   The following variable is updated by custom Emacs setup whenever
 #   this file is saved.
 
-my $VERSION = '2010.0404.0635';
+my $VERSION = '2010.0527.1805';
 
 #  Total statistics
 
@@ -99,7 +99,7 @@ sub Initialize ()
 
     $LICENSE    = "GPL-2+";
     $CONTACT    = "Jari Aalto";
-    $URL        = "http://freshmeat.net/projects/indent-stat";
+    $URL        = "http://freecode.net/projects/indent-stat";
 
     $LIB        = basename $PROGRAM_NAME;
     $PROGNAME   = $LIB;
@@ -244,7 +244,7 @@ indent(1)
 
 =head1 AVAILABILITY
 
-Homepage is at http://freshmeat.net/projects/indent-stat
+Homepage is at http://freecode.net/projects/indent-stat
 
 =head1 AUTHOR
 
@@ -275,8 +275,12 @@ sub Help (;$$)
     }
     elsif ( $type eq -man )
     {
-	eval "use Pod::Man"
-	    or die "$id: Cannot generate Man: $EVAL_ERROR";
+	eval "use Pod::Man";
+
+	if ( $EVAL_ERROR )
+	{
+	    die "$id: Cannot load Pod::Man: $EVAL_ERROR";
+	}
 
 	my %options;
 	$options{center} = "User commands";
@@ -292,7 +296,7 @@ sub Help (;$$)
 	    # while "strict refs" in use at
 	    # /usr/share/perl/5.10/Pod/Text.pm line 249.
 
-	    system "pod2text $PROGRAM_NAME";
+	    system "perl -S pod2text $PROGRAM_NAME";
 	}
 	else
 	{

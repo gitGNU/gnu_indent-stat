@@ -89,15 +89,15 @@ PERL		= perl
 docdir = doc/manual
 manpage = bin/$(PACKAGE).1
 
+# Rule: all - Make documentation
 all: doc
-	# target: all
 	@echo "For more information, see 'make help'"
 
 # Rule: help - Display Makefile rules
 help:
-	grep "^[[:space:]]*# Rule:" Makefile | sed 's/^[[:space:]]*//' | sort
+	grep -E "^[[:space:]]*# Rule:" Makefile | sed 's/^[[:space:]]*//' | sort
 
-# Rule: clean - remove temporary files
+# Rule: clean - Remove temporary files
 clean:
 	# target: clean
 	find .	-name "*[#~]" \
@@ -109,12 +109,13 @@ clean:
 	rm -rf tmp
 
 distclean: clean
-	# Rule: distclean - remove everything that can be generated
+	# target: distclean - Remove everything that can be generated
 	rm -f $(manpage)
 	rm -rf $(docdir)
 
 realclean: clean
 
+# Rule: dist-git - [maintainer] release from Git dir (raw)
 dist-git: test doc
 	rm -f $(DIST_DIR)/$(RELEASE)*
 
@@ -131,7 +132,7 @@ dist-git: test doc
 dist-snap: test doc
 	@echo gt tar -q -z -p $(PACKAGE) -c -D master
 
-# Rule: dist-git - [maintainer] make release archive
+# Rule: dist - [maintainer] make release archive
 dist: dist-git
 
 dist-ls:
@@ -171,19 +172,21 @@ txt: docdir test-pod doc/manual/$(PACKAGE).txt
 # Rule: doc - Generate or update all documentation
 doc: man html txt
 
+# Rule: test-pod - Check POD manual page syntax
 test-pod:
-	# Rule: pod-test - Check POD syntax
+	# target: pod-test - Check POD syntax
 	podchecker $(PL_SCRIPT)
 
+# Rule: test-perl - Check program syntax
 test-perl:
-	# Rule: perl-test - Check program syntax
-	perl -cw $(PL_SCRIPT)
+	# target: perl-test - Check program syntax
+	$(PERL) -cw $(PL_SCRIPT)
 
 # Rule: test - Run all tests
-test: test-perl test-pod
+test: test-pod test-perl
 
-# Rule: install-doc - Install documentation
 install-doc:
+	# target: install-doc - Install documentation
 	$(INSTALL_BIN) -d $(DOCDIR)
 
 	[ ! "$(INSTALL_OBJS_DOC)" ] || \
@@ -193,12 +196,12 @@ install-doc:
 	$(TAR) -C $(DOCDIR) --extract --file=-
 
 install-man: man
-	# Rule: install-man - Install manual pages
+	# target: install-man - Install manual pages
 	$(INSTALL_BIN) -d $(MANDIR1)
 	$(INSTALL_DATA) $(INSTALL_OBJS_MAN) $(MANDIR1)
 
 install-bin:
-	# Rule: install-bin - Install programs
+	# target: install-bin - Install programs
 	$(INSTALL_BIN) -d $(BINDIR)
 	for f in $(INSTALL_OBJS_BIN); \
 	do \
