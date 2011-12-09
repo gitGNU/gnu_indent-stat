@@ -99,7 +99,7 @@ sub Initialize ()
 
     $LICENSE    = "GPL-2+";
     $CONTACT    = "Jari Aalto";
-    $URL        = "http://freecode.net/projects/indent-stat";
+    $URL        = "http://freecode.com/projects/indent-stat";
 
     $LIB        = basename $PROGRAM_NAME;
     $PROGNAME   = $LIB;
@@ -244,7 +244,7 @@ indent(1)
 
 =head1 AVAILABILITY
 
-Homepage is at http://freecode.net/projects/indent-stat
+Homepage is at http://freecode.com/projects/indent-stat
 
 =head1 AUTHOR
 
